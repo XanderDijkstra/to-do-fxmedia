@@ -8,6 +8,7 @@ import {
   List,
   History,
   Settings,
+  FileText,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/scrape", label: "New Scrape", icon: Search },
   { href: "/lists", label: "Lists", icon: List },
   { href: "/jobs", label: "Scrape History", icon: History },
+  { href: "/docs", label: "Docs", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
