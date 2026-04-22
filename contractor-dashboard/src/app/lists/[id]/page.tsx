@@ -268,12 +268,25 @@ export default function ListDetailPage({
     setSelectedIds(newSet);
   };
 
+  const AUTO_DELETE_STATUSES = ["converted"];
+
   // Status change for individual lead
   const handleStatusChange = async (leadId: string, newStatus: string) => {
-    // Optimistic update
-    setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
-    );
+    const willDelete = AUTO_DELETE_STATUSES.includes(newStatus);
+
+    // Optimistic update: remove if auto-delete status, otherwise update
+    if (willDelete) {
+      setLeads((prev) => prev.filter((l) => l.id !== leadId));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(leadId);
+        return next;
+      });
+    } else {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
+      );
+    }
 
     try {
       const res = await fetch(`/api/leads/${leadId}`, {
@@ -292,24 +305,32 @@ export default function ListDetailPage({
   const handleBulkStatusChange = async (newStatus: string) => {
     if (selectedIds.size === 0) return;
 
-    // Optimistic
-    setLeads((prev) =>
-      prev.map((l) =>
-        selectedIds.has(l.id) ? { ...l, status: newStatus } : l
-      )
-    );
+    const willDelete = AUTO_DELETE_STATUSES.includes(newStatus);
+
+    // Optimistic: remove if auto-delete status, otherwise update
+    if (willDelete) {
+      setLeads((prev) => prev.filter((l) => !selectedIds.has(l.id)));
+    } else {
+      setLeads((prev) =>
+        prev.map((l) =>
+          selectedIds.has(l.id) ? { ...l, status: newStatus } : l
+        )
+      );
+    }
+
+    const idsToUpdate = Array.from(selectedIds);
+    setSelectedIds(new Set());
 
     try {
       const res = await fetch("/api/leads/bulk-update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          lead_ids: Array.from(selectedIds),
+          lead_ids: idsToUpdate,
           status: newStatus,
         }),
       });
       if (!res.ok) throw new Error("Bulk update failed");
-      setSelectedIds(new Set());
     } catch {
       fetchData();
     }
