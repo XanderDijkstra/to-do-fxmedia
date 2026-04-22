@@ -9,6 +9,7 @@ import {
   History,
   Settings,
   FileText,
+  BarChart3,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/scrape", label: "New Scrape", icon: Search },
   { href: "/lists", label: "Lists", icon: List },
   { href: "/jobs", label: "Scrape History", icon: History },
+  { href: "/reporting", label: "Reporting", icon: BarChart3 },
   { href: "/docs", label: "Docs", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
